@@ -1,0 +1,56 @@
+useDynLib(mokken, .registration = TRUE, .fixes="C_")
+
+export(
+ aisp,
+ coefH,
+ coefZ,
+ check.bounds,
+ check.ca,
+ check.errors,
+ check.monotonicity,
+ check.norms,
+ check.iio,
+ check.pmatrix,
+ check.reliability,
+ check.restscore,
+ MLcoefH,
+ MLweight,
+ recode,
+ twoway
+)
+
+# used internally - not intended to be visible to users
+#  all.patterns
+#  check.data
+#  complete.observed.frequencies
+#  direct.sum
+#  dphi
+#  MLweight
+#  phi
+#  plot.monotonicity.class,
+#  plot.pmatrix.class,
+#  plot.restscore.class,
+#  search.normal
+#  search.extended
+#  search.ga
+#  string2integer
+#  summary.monotonicity.class,
+#  summary.pmatrix.class,
+#  summary.restscore.class
+#  weights
+
+importFrom(graphics, plot)
+importFrom("graphics", "axis", "layout", "lines", "par", "polygon", "title")
+importFrom("stats", "as.formula", "cor", "cov", "aggregate", "median", "pchisq", "pnorm", "qnorm", "quantile", "rnorm", "runif", "sd", "t.test", "var")
+importFrom("grDevices", "col2rgb", "rgb")
+importFrom("utils", "combn", "flush.console")
+import(poLCA)
+
+S3method(summary, "monotonicity.class")
+S3method(summary, "pmatrix.class")
+S3method(summary, "restscore.class")
+S3method(summary, "iio.class")
+S3method(plot, "monotonicity.class")
+S3method(plot, "pmatrix.class")
+S3method(plot, "restscore.class")
+S3method(plot, "iio.class")

@@ -1,17 +1,6 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-/***********************************************
-* Initialize. Randomly draw a first population *
-***********************************************/
-void InitializeRcpp(IntegerVector& population, const int nclus){
-
-	/* Draw random numbers */
-	for (int i = 0; i < population.size(); i++) {
-		population[i] = int (R::unif_rand() * nclus) + 1;
-	}
-}
-
 /*************************************************
 * ScaleNumItems. Determine how many items are in *
 * each scale.                                    *
@@ -19,26 +8,27 @@ void InitializeRcpp(IntegerVector& population, const int nclus){
 
 void ScaleNumItemsRcpp(const int mem, const int nclus, IntegerVector & NUMITEMS, const int NITEM, IntegerMatrix & pop){
 
+	int i, j; /* loop indicators */
+
 	/* Fix all values to zero */
 	NUMITEMS.fill(0);
 
 	/* Count the number of items in scale j */
-	for (int i = 0; i<NITEM; i++)
-		for (int j = 1; j < (nclus + 1); j++)
-			if (pop(i, mem) == j)
-				NUMITEMS[j-1]++;
+	for(i=0; i<NITEM; i++)
+		for(j=1; j<(nclus+1); j++)
+			if(pop[i + mem*NITEM] == j)  NUMITEMS[j-1]++;
 
 	/**********************************************************************
 	* if the number of items in scale j equals 1, then the item belonging *
 	* to that scale will be assigned to scale "zero" which is used        *
 	* as a scale for the non-scalable items                               *
 	**********************************************************************/
-	for (int i =0; i < nclus; i++)
-		if (NUMITEMS[i] == 1)
-			for (int j=0; j<NITEM; j++)
-				if (pop(i, mem) == (i+1))
+	for(i=0; i<nclus; i++)
+		if(NUMITEMS[i] == 1)
+			for(j=0; j<NITEM; j++)
+				if(pop[j + mem*NITEM] == (i+1))
 				{
-					pop(i, mem) = 0;
+					pop[j + mem*NITEM] = 0;
 					NUMITEMS[i] = 0;
 				}
 }
@@ -50,11 +40,11 @@ void ScaleNumItemsRcpp(const int mem, const int nclus, IntegerVector & NUMITEMS,
 int NumScalesRcpp(const int nclus, const IntegerVector & NUMITEMS)
 {
 
-	int NSCALES = 0;
+	int i;				/*loop indicator */
+	int NSCALES = 0;	/* initialize number of scales to zero */
+
 	/* count the number of clusters with at least two items */
-	for(int i=0; i < nclus; i++)
-		if (NUMITEMS[i] > 1)
-			NSCALES++;
+	for(i=0; i<nclus; i++) if(NUMITEMS[i] > 1) NSCALES++;
 
 	return(NSCALES);
 }
@@ -65,74 +55,26 @@ int NumScalesRcpp(const int nclus, const IntegerVector & NUMITEMS)
 ***********************************************************/
 
 void ScaleItemsRcpp(const int mem, const int nclus, const int NITEM,
-					IntegerMatrix& pop, IntegerMatrix ITEMS, IntegerVector& NUMITEMS)
+					IntegerMatrix& pop, IntegerMatrix& ITEMS, IntegerVector& NUMITEMS)
 {
+	int i,j,k; /* loop indicators */
 
 	ITEMS.fill(0);
 
 	/* a matrix which denotes which item belongs to which scale  */
-	for (int i=0; i < nclus; i++)
-	{
-		if (NUMITEMS[i] > 1)
+	for(i=0; i<nclus; i++)
+		if(NUMITEMS[i] > 1)
 		{
-			int k = 0;
-			for (int j = 0; j < NITEM; j++)
+			k=0;
+			for(j=0; j<NITEM; j++)
 			{
-				if (pop(j, mem) == (i + 1))
+				if(pop[j + mem*NITEM] == (i+1))
 				{
-					ITEMS(k, i) = j;
+					ITEMS[k + i*NITEM] = j;
 					k++;
 				}
 			}
 		}
-	}
-}
-
-/*****************************************
-* CoefHi. Calculate the Hi-coefficients. *
-*****************************************/
-
-void CoefHiRcpp(
-	const	IntegerMatrix&	ITEMS,
-	const	int				scale,
-	const	int				NUMITEMS,
-	const	int				NITEM,
-	const	NumericMatrix&	VAR,
-	const	NumericMatrix&	MAXVAR,
-			NumericVector&	Hi) {
-
-	int a, b;                         /* indicators for "items" */
-	int i,j;                          /* loop indicators */
-
-	/* sum of variances */
-	NumericVector S(NITEM);
-	/* sum of maximum variances */
-	NumericVector Smax(NITEM);
-
-	/* initialize all Hi coefficients to zero */
-	Hi.fill(0);
-
-	/* calculate Hi coefficients */
-	for (i=0; i<NUMITEMS; i++)
-	{
-		a = ITEMS[i + scale*NITEM];
-		S[i] = 0.0;
-		Smax[i] = 0.0;
-
-		for (j=0; j<NUMITEMS; j++)
-		{
-			b = ITEMS[j + scale*NITEM];
-			if (i != j)
-			{
-				S[i] += VAR[b+a*NITEM];
-				Smax[i] += MAXVAR[b+a*NITEM];
-			}
-		}
-		if (Smax[i] > 0.000001)
-			Hi[i] = S[i]/Smax[i];
-		else
-			Hi[i] = 0;
-	}
 }
 
 /************************************************
@@ -194,6 +136,56 @@ void sortScalesRcpp(IntegerVector& NUMITEMS, const int nclus, IntegerVector& ord
 		}
 	}
 }
+
+/*****************************************
+* CoefHi. Calculate the Hi-coefficients. *
+*****************************************/
+
+void CoefHiRcpp(
+	const	IntegerMatrix&	ITEMS,
+	const	int				scale,
+	const	int				NUMITEMS,
+	const	int				NITEM,
+	const	NumericMatrix&	VAR,
+	const	NumericMatrix&	MAXVAR,
+			NumericVector&	Hi) {
+
+	int a, b;                         /* indicators for "items" */
+	int i,j;                          /* loop indicators */
+
+	/* sum of variances */
+	NumericVector S(NITEM);
+	/* sum of maximum variances */
+	NumericVector Smax(NITEM);
+
+	/* initialize all Hi coefficients to zero */
+	Hi.fill(0);
+
+	/* calculate Hi coefficients */
+	for (i=0; i<NUMITEMS; i++)
+	{
+		a = ITEMS[i + scale*NITEM];
+		S[i] = 0.0;
+		Smax[i] = 0.0;
+
+		for (j=0; j<NUMITEMS; j++)
+		{
+			b = ITEMS[j + scale*NITEM];
+			if (i != j)
+			{
+				S[i] += VAR[b+a*NITEM];
+				Smax[i] += MAXVAR[b+a*NITEM];
+			}
+		}
+		if (Smax[i] > 0.000001)
+			Hi[i] = S[i]/Smax[i];
+		else
+			Hi[i] = 0;
+	}
+}
+
+
+
 
 
 /*******************************************************************
@@ -393,7 +385,7 @@ void testHijRcpp(
 				}
 				else {
 					/* randomly delete one of the two items */
-					randnum = unif_rand();
+					randnum = R::unif_rand();
 
 					if(randnum < 0.5) {
 						pop[mem*NITEM + a] = 0;
@@ -420,6 +412,16 @@ void testHijRcpp(
 	}
 }
 
+/***********************************************
+* Initialize. Randomly draw a first population *
+***********************************************/
+void InitializeRcpp(IntegerVector& population, const int nclus){
+
+	/* Draw random numbers */
+	for (int i = 0; i < population.size(); i++) {
+		population[i] = int (R::unif_rand() * nclus) + 1;
+	}
+}
 
 /*******************************************************************
 * Evaluation. Evaluate whether the partitionings in the population *
@@ -699,8 +701,8 @@ void CrossoverRcpp(
 
 	/* for all pairs of members cross over all elements between point 1 and point2 */
 	for(i=0; i<count; i+=2) {
-		point1 = (int) (unif_rand() * NITEM);
-		point2 = (int) (unif_rand() * NITEM);
+		point1 = (int) (R::unif_rand() * NITEM);
+		point2 = (int) (R::unif_rand() * NITEM);
 
 		if(point1 < point2) {
 			for(j=point1; j<=point2; j++) {
@@ -755,7 +757,7 @@ void MutationRcpp(
 	/* Draw random numbers */
 	for(i=0; i<POPSIZE; i++)
 		for(j=0; j<NITEM; j++)
-			MutationMatrix[j + i*NITEM] = unif_rand();
+			MutationMatrix[j + i*NITEM] = R::unif_rand();
 
 	/* if MutationMatrix[j + i*NITEM] < PMUTATION, then change
 		population[j + i*NITEM] to another number */
@@ -819,7 +821,7 @@ void MutationRcpp(
 *******************************************************************************/
 
 
-int GeneticAlgorithmRcpp(
+void GeneticAlgorithmRcpp(
 	const	int				POPSIZE,
 	const	int				NPERS,
 	const	int				MAXGENS,
@@ -831,10 +833,11 @@ int GeneticAlgorithmRcpp(
 	const	NumericMatrix&	variance,
 	const	NumericMatrix&	maxVariance,
 	const	NumericMatrix&	SijMatrix,
-			int				itercount,
+	const	NumericMatrix&	HijMatrix,
+	// these three change across iterations
+			int&			itercount,
 			IntegerMatrix&	population,
-			NumericVector&	fitness,
-	const	NumericMatrix&	HijMatrix
+			NumericVector&	fitness
 )
 {
 	// TODO: check if generation can just be an int, passed by reference
@@ -920,7 +923,6 @@ int GeneticAlgorithmRcpp(
 		if(fitness[POPSIZE] == 1)   generation[0] = MAXGENS;
 	}
 	itercount++;
-	return itercount;
 
 }
 
@@ -942,26 +944,23 @@ IntegerMatrix runGeneticAlgorithm(
 	fitness.fill(0);
 
 	NumericMatrix HijMatrix(NITEM, NITEM);
-	NumericMatrix ZijMatrix(NITEM, NITEM);
 
 	for(int i = 0; i<NITEM; i++)
 	{
-		for(int j = 0; j < NITEM; j++)
+		for(int j = 0; j<NITEM; j++)
 		{
 			if (maxVariance(j, i) > 0.0000001)
 				HijMatrix(j, i) = variance(j, i) / maxVariance(j, i);
-			if (variance(i, i) != 0 && variance(i, i) > 0)
-				ZijMatrix(j, i) = (variance(j, i) * std::sqrt(NPERS-1)) / std::sqrt(variance(i, i) * variance(j, j));
 		}
 	}
 
-	int iterCheck = int(ceil(double(MAXGENS) / double(ITER)));
-	while (itercount != iterCheck)
-	{
-		itercount = GeneticAlgorithmRcpp(POPSIZE, NPERS, MAXGENS,PXOVER, PMUTATION, critval,
-							alpha, NITEM, variance, maxVariance, SijMatrix, itercount,
-							population, fitness, HijMatrix);
-	}
+	const int iterCheck = int(ceil(double(MAXGENS) / double(ITER)));
+	do	{
+		GeneticAlgorithmRcpp(POPSIZE, NPERS, MAXGENS,PXOVER, PMUTATION, critval,
+							alpha, NITEM, variance, maxVariance, SijMatrix, HijMatrix,
+							// these three change across iterations
+							itercount, population, fitness);
+	}	while (itercount != iterCheck);
 
 	return population;
 }

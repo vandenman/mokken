@@ -1,7 +1,6 @@
 "search.ga" <- function(X, popsize, maxgens, alpha, critval, pxover, pmutation){
              
      nitem <- ncol(X)
-     item.label <- dimnames(X)[[2]]
         
      if(nitem <= 10)      iter <- maxgens
      else if(nitem <= 20) iter <- 5000
@@ -14,7 +13,6 @@
      max.variance <- var(apply(X, 2, sort))
      SijMatrix <- outer(apply(X, 2, var), apply(X, 2, var), "*")
 
-     set.seed(1)
      ans <- runGeneticAlgorithm(
              POPSIZE = as.integer(popsize), 
              NPERS = as.integer(npers), 
@@ -29,9 +27,7 @@
              maxVariance = max.variance, 
              SijMatrix = SijMatrix
      )
-     print(matrix(c(ans),popsize+2,nitem,byrow=T))
      
      InSet <- as.matrix(c(matrix(c(ans),popsize+2,nitem,byrow=T)[popsize+1,]))
-     print(InSet)
      return(InSet)
 }

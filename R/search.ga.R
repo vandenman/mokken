@@ -10,22 +10,28 @@
      if(maxgens < iter) iter <- maxgens
      
      npers <- nrow(X)
-     variance <- c(var(X))
-     max.variance <- c(var(apply(X, 2, sort)))
-     SijMatrix <- c( outer(apply(X, 2, var), apply(X, 2, var), "*"))
-     Population <- rep(0,nitem*(popsize+2))
-     itercount <- 0
-     fitness <- rep(0,(popsize+2)*3)
-     while(1){
-       Output <- .C(C_GeneticAlgorithm,as.integer(Population),as.integer(itercount),as.integer(popsize),
-                  as.integer(nitem),as.integer(npers),as.integer(iter),as.double(pxover),as.double(pmutation),
-                  as.double(critval),as.double(alpha),as.double(variance),as.double(max.variance),
-                  as.double(SijMatrix), as.double(fitness))
-        itercount <- Output[[2]]
-        Population <- Output[[1]]
-        fitness <- c(Output[[14]][1:(popsize+2)],rep(0,(popsize+2)*2))
-        if(itercount == ceiling(maxgens/iter)) break   
-     }
-     InSet <- as.matrix(c(matrix(Output[[1]],popsize+2,nitem,byrow=T)[popsize+1,]))
+     variance <- var(X)
+     max.variance <- var(apply(X, 2, sort))
+     SijMatrix <- outer(apply(X, 2, var), apply(X, 2, var), "*")
+
+     set.seed(1)
+     ans <- runGeneticAlgorithm(
+             POPSIZE = as.integer(popsize), 
+             NPERS = as.integer(npers), 
+             MAXGENS = as.integer(maxgens), 
+             PXOVER = as.double(pxover),
+             PMUTATION = as.double(pmutation), 
+             critval = as.double(critval),
+             alpha = as.double(alpha),
+             NITEM = as.integer(nitem),
+             ITER = as.integer(iter),
+             variance = variance,
+             maxVariance = max.variance, 
+             SijMatrix = SijMatrix
+     )
+     print(matrix(c(ans),popsize+2,nitem,byrow=T))
+     
+     InSet <- as.matrix(c(matrix(c(ans),popsize+2,nitem,byrow=T)[popsize+1,]))
+     print(InSet)
      return(InSet)
 }

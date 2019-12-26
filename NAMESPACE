@@ -1,4 +1,4 @@
-useDynLib(mokken, .registration = TRUE, .fixes="C_")
+useDynLib(mokken, .registration = TRUE)
 
 export(
  aisp,
@@ -17,7 +17,8 @@ export(
  MLcoefH,
  MLweight,
  recode,
- twoway
+ twoway,
+ runGeneticAlgorithm
 )
 
 # used internally - not intended to be visible to users
@@ -46,6 +47,7 @@ importFrom("stats", "as.formula", "cor", "cov", "aggregate", "median", "pchisq",
 importFrom("grDevices", "col2rgb", "rgb")
 importFrom("utils", "combn", "flush.console")
 import(poLCA)
+import(Rcpp)
 
 S3method(summary, "monotonicity.class")
 S3method(summary, "pmatrix.class")

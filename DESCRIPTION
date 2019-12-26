@@ -17,3 +17,6 @@ Description: Contains functions for performing Mokken
    It includes an automated item selection algorithm, and various checks of model assumptions.
 License: GPL (>= 2)
 URL: https://sites.google.com/a/tilburguniversity.edu/avdrark/mokken
+LinkingTo: 
+    Rcpp
+Imports: Rcpp

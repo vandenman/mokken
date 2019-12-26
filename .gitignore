@@ -1,4 +1,6 @@
 *.o
 *.so
+*.dll
 *.Rbuildignore
 /.Rproj.user/*
+.Rproj.user

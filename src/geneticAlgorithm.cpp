@@ -1,3 +1,34 @@
+/******************************************************************************
+* A genetic algorithm for item selection in the context of Mokken scale       *
+* analysis. This program is accessible in the R package mokken.               *
+* The functions in this file are ordered from specific to general.            *
+*                                                                             *
+* Author: J.H. Straat                                                         *
+* Rewritten to Rcpp by D. van den Bergh
+*                                                                             *
+* General outline of the algorithm:                                           *
+*                                                                             *
+* 1   Initial population                                                      *
+* 1.1 Randomly draw the initial population                                    *
+* 1.2 Evaluate whether the initial population satisfies the Mokken scale      *
+*       criteria.                                                             *
+* 1.3 Store the best partitioning of the initial population                   *
+*                                                                             *
+* 2   Repeat the steps in this part until no new 'best partitioning' is found *
+*       in 'maxgens' generations.                                             *
+* 2.1 Select a new population from the members of the old population.         *
+*       The probability of being selected is related to the member's fitness. *
+* 2.2 Crossover. Exchange two equivalent subvectors of two members.      *
+* 2.3 Mutation. Randomly change some of the numbers.                          *
+* 2.4 Evaluate whether the new population satisfies the Mokken scale criteria *
+* 2.5 Compare the best partitioning of the new population with the stored     *
+*     best partitioning.                                                      *
+* 2.6 If the stored best partitioning is not contained in the new population, *
+*     replace the worst partitioning of the new population by the stored best *
+*     partitioning.                                                           *
+*                                                                             *
+******************************************************************************/
+
 #include <Rcpp.h>
 using namespace Rcpp;
 
@@ -49,6 +80,8 @@ int NumScalesRcpp(const int nclus, const IntegerVector & NUMITEMS)
 	return(NSCALES);
 }
 
+
+
 /***********************************************************
 * ScaleItems. A matrix which indicates which items belongs *
 * to which scale.                                          *
@@ -76,6 +109,8 @@ void ScaleItemsRcpp(const int mem, const int nclus, const int NITEM,
 			}
 		}
 }
+
+
 
 /************************************************
 * SortHi. Ascendingly sort the Hi-coefficients. *
@@ -137,6 +172,8 @@ void sortScalesRcpp(IntegerVector& NUMITEMS, const int nclus, IntegerVector& ord
 	}
 }
 
+
+
 /*****************************************
 * CoefHi. Calculate the Hi-coefficients. *
 *****************************************/
@@ -183,8 +220,6 @@ void CoefHiRcpp(
 			Hi[i] = 0;
 	}
 }
-
-
 
 
 
@@ -254,6 +289,7 @@ void Criterion2Rcpp(
 			return; // exit while loop and function
 	}
 }
+
 
 
 /******************************************************************************
@@ -345,6 +381,7 @@ void TestHiRcpp(
 }
 
 
+
 /******************************************************************
 * testHij. Investigate whether the first criterion of a Mokken    *
 * scale is satisfied, that is, if all Hij coefficients are larger *
@@ -422,6 +459,7 @@ void InitializeRcpp(IntegerVector& population, const int nclus){
 		population[i] = int (R::unif_rand() * nclus) + 1;
 	}
 }
+
 
 /*******************************************************************
 * Evaluation. Evaluate whether the partitionings in the population *
@@ -554,6 +592,9 @@ int KeepTheBestRcpp(
 
 		for(i=0; i<NITEM; i++)
 			pop[POPSIZE*NITEM + i] = pop[(POPSIZE+1)*NITEM + i];
+		Rcpp::Rcout << "itercount reset to 0 but was: " << itercount << std::endl;
+		Rcpp::Rcout << "Generation: " << generation[0] << std::endl;
+
 		generation[0]=0;
 		itercount = 0;
 	}
@@ -704,14 +745,16 @@ void CrossoverRcpp(
 		point1 = (int) (R::unif_rand() * NITEM);
 		point2 = (int) (R::unif_rand() * NITEM);
 
-		if(point1 < point2) {
+		if(point1 < point2)
+		{
 			for(j=point1; j<=point2; j++) {
 				temp = pop[j + NITEM*members[i]];
 				pop[j + NITEM*members[i]] = pop[j + NITEM*members[i+1]];
 				pop[j + NITEM*members[i+1]] = temp;
 			}
 		}
-		if(point1 > point2) {
+		else if(point1 > point2)
+		{
 			for(j=0; j<=point2; j++) {
 				temp = pop[ j + NITEM*members[i] ];
 				pop[ j + NITEM*members[i]] = pop[ j + NITEM*members[i+1]];
@@ -723,10 +766,10 @@ void CrossoverRcpp(
 				pop[j + NITEM*members[i+1]] = temp;
 			}
 		}
-		if(point1 == point2){
+		else // point1 == point2
+		{
 			temp = pop[point1 + NITEM*members[i]];
-			pop[point1 + NITEM*members[i]] =
-					pop[point1 + NITEM*members[i+1]];
+			pop[point1 + NITEM*members[i]] = pop[point1 + NITEM*members[i+1]];
 			pop[point1 + NITEM*members[i+1]] = temp;
 		}
 
@@ -820,6 +863,17 @@ void MutationRcpp(
 *    partitioning.                                                             *
 *******************************************************************************/
 
+#include <chrono>
+using namespace std::chrono;
+void printTime(const high_resolution_clock::time_point& start,
+			   const high_resolution_clock::time_point& stop,
+			   const std::string& text)
+{
+    auto duration = duration_cast<milliseconds>(stop - start);
+	Rcpp::Rcout << "Time taken by function: " << text
+				<< duration.count() << " ms" << std::endl;
+
+}
 
 void GeneticAlgorithmRcpp(
 	const	int				POPSIZE,
@@ -837,7 +891,8 @@ void GeneticAlgorithmRcpp(
 	// these three change across iterations
 			int&			itercount,
 			IntegerMatrix&	population,
-			NumericVector&	fitness
+			NumericVector&	fitness,
+			IntegerMatrix&	newpopulation
 )
 {
 	// TODO: check if generation can just be an int, passed by reference
@@ -850,9 +905,6 @@ void GeneticAlgorithmRcpp(
 	/* the critical Z-value used in tests */
 	const double Zcv = R::qnorm(probability, 0, 1, 1, 0);
 
-	/* total number of elements in the population matrix */
-	const int Total = POPSIZE * NITEM;
-
 	/* maximum number of scales */
 	const int nclus = NITEM / 2; // integer division is on purpose.
 
@@ -863,10 +915,8 @@ void GeneticAlgorithmRcpp(
 	for (int i = POPSIZE + 2; i < fitness.size(); i++)
 		fitness[i] = 0.0;
 
-	IntegerMatrix newpopulation(POPSIZE, NITEM);
-	int popSum = 0;
-	for(int i=0; i<Total; i++)
-		popSum += population[i];
+	newpopulation.fill(0);
+	int popSum = Rcpp::sum(population);
 
 	if (popSum == 0)
 	{
@@ -897,11 +947,12 @@ void GeneticAlgorithmRcpp(
 
 	/* An iterative process to find the final partitioning */
 	while(generation[0]<MAXGENS) {
-
 		TotalFitness = 0.0;
 		generation[0]++;
 
+//		Rcpp::Rcout << "generation[0]" << generation[0] << std::endl;
 		/* select a new population */
+//		auto start = high_resolution_clock::now();
 		SelectionRcpp(POPSIZE,NITEM,fitness,population,newpopulation);
 
 		/* crossovers between members */
@@ -919,6 +970,10 @@ void GeneticAlgorithmRcpp(
 
 		/* ascertain that best partitioning always stays in the population */
 		ElitistRcpp(POPSIZE, NITEM, fitness, population);
+
+//		auto stop = high_resolution_clock::now();
+//		printTime(start, stop, "SelectionRcpp");
+
 
 		if(fitness[POPSIZE] == 1)   generation[0] = MAXGENS;
 	}
@@ -944,6 +999,7 @@ IntegerMatrix runGeneticAlgorithm(
 	fitness.fill(0);
 
 	NumericMatrix HijMatrix(NITEM, NITEM);
+	IntegerMatrix newpopulation(POPSIZE, NITEM);
 
 	for(int i = 0; i<NITEM; i++)
 	{
@@ -955,12 +1011,19 @@ IntegerMatrix runGeneticAlgorithm(
 	}
 
 	const int iterCheck = int(ceil(double(MAXGENS) / double(ITER)));
-	do	{
+	Rcpp::Rcout << "iterCheck " << iterCheck << std::endl;
+	do
+	{
 		GeneticAlgorithmRcpp(POPSIZE, NPERS, MAXGENS,PXOVER, PMUTATION, critval,
 							alpha, NITEM, variance, maxVariance, SijMatrix, HijMatrix,
 							// these three change across iterations
-							itercount, population, fitness);
-	}	while (itercount != iterCheck);
+							itercount, population, fitness,
+							// preinitialized memory
+							newpopulation);
+		Rcpp::Rcout << "itercount " << itercount << std::endl;
+		Rcpp::Rcout << "fitness[POPSIZE] " << fitness[POPSIZE] << std::endl;
+	}
+	while (itercount != iterCheck);
 
 	return population;
 }

@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // runGeneticAlgorithm
-IntegerMatrix runGeneticAlgorithm(const int POPSIZE, const int NPERS, const int MAXGENS, const double PXOVER, const double PMUTATION, const double critval, const double alpha, const int NITEM, const int ITER, const NumericMatrix& variance, const NumericMatrix& maxVariance, const NumericMatrix& SijMatrix);
-RcppExport SEXP _mokken_runGeneticAlgorithm(SEXP POPSIZESEXP, SEXP NPERSSEXP, SEXP MAXGENSSEXP, SEXP PXOVERSEXP, SEXP PMUTATIONSEXP, SEXP critvalSEXP, SEXP alphaSEXP, SEXP NITEMSEXP, SEXP ITERSEXP, SEXP varianceSEXP, SEXP maxVarianceSEXP, SEXP SijMatrixSEXP) {
+IntegerMatrix runGeneticAlgorithm(const int POPSIZE, const int NPERS, const int MAXGENS, const double PXOVER, const double PMUTATION, const double critval, const double alpha, const int NITEM, const int ITER, const NumericMatrix& VAR, const NumericMatrix& MAXVAR, const NumericMatrix& SijMatrix);
+RcppExport SEXP _mokken_runGeneticAlgorithm(SEXP POPSIZESEXP, SEXP NPERSSEXP, SEXP MAXGENSSEXP, SEXP PXOVERSEXP, SEXP PMUTATIONSEXP, SEXP critvalSEXP, SEXP alphaSEXP, SEXP NITEMSEXP, SEXP ITERSEXP, SEXP VARSEXP, SEXP MAXVARSEXP, SEXP SijMatrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,10 +20,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const int >::type NITEM(NITEMSEXP);
     Rcpp::traits::input_parameter< const int >::type ITER(ITERSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type variance(varianceSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type maxVariance(maxVarianceSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type VAR(VARSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type MAXVAR(MAXVARSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix& >::type SijMatrix(SijMatrixSEXP);
-    rcpp_result_gen = Rcpp::wrap(runGeneticAlgorithm(POPSIZE, NPERS, MAXGENS, PXOVER, PMUTATION, critval, alpha, NITEM, ITER, variance, maxVariance, SijMatrix));
+    rcpp_result_gen = Rcpp::wrap(runGeneticAlgorithm(POPSIZE, NPERS, MAXGENS, PXOVER, PMUTATION, critval, alpha, NITEM, ITER, VAR, MAXVAR, SijMatrix));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -64,6 +64,8 @@ void ScaleNumItemsRcpp(const int mem, const int nclus, IntegerVector & NUMITEMS,
 				}
 }
 
+
+
 /**********************************************
 * NumScales. Count the total number of scales *
 **********************************************/
@@ -119,16 +121,15 @@ void ScaleItemsRcpp(const int mem, const int nclus, const int NITEM,
 void sortHiRcpp(NumericVector & Hi, const int NUMITEMS, IntegerVector & orderHi)
 {
 
+	int i, j;         /* for-loop indicators */
 	int temp1;        /* A temporary variable */
 	double temp;      /* A temporary variable */
 
-	for(int i=0; i < NUMITEMS; i++) orderHi[i] = i;
+	for(i=0; i<NUMITEMS; i++) orderHi[i] = i;
 
 	/* sort the coefficients */
-	for(int i = 0; i < NUMITEMS; i++)
-	{
-		for (int j = 0; j < (NUMITEMS-1); j++)
-		{
+	for(i=0; i<NUMITEMS; i++)
+		for(j=0; j<(NUMITEMS-1); j++)
 			if(Hi[j] > Hi[j+1])
 			{
 				temp = Hi[j];
@@ -138,8 +139,6 @@ void sortHiRcpp(NumericVector & Hi, const int NUMITEMS, IntegerVector & orderHi)
 				orderHi[j] = orderHi[j+1];
 				orderHi[j+1] = temp1;
 			}
-		}
-	}
 }
 
 /*******************************************************************
@@ -149,15 +148,14 @@ void sortHiRcpp(NumericVector & Hi, const int NUMITEMS, IntegerVector & orderHi)
 void sortScalesRcpp(IntegerVector& NUMITEMS, const int nclus, IntegerVector& order)
 {
 
+	int i, j;
 	int temp;      /* A temporary variable */
 
-	for (int i = 0; i < nclus; i++) order[i] = i;
+	for (i=0; i < nclus; i++) order[i] = i;
 
 	/* sort the scales */
-	for (int i = 0; i < nclus; i++)
-	{
-		for (int j = 0; j < (nclus-1); j++)
-		{
+	for (i=0; i < nclus; i++)
+		for (j=0; j < (nclus-1); j++)
 			if(NUMITEMS[j] < NUMITEMS[j+1])
 			{
 				temp = NUMITEMS[j];
@@ -168,8 +166,6 @@ void sortScalesRcpp(IntegerVector& NUMITEMS, const int nclus, IntegerVector& ord
 				order[j+1] = temp;
 
 			}
-		}
-	}
 }
 
 
@@ -259,8 +255,8 @@ void Criterion2Rcpp(
 			/* if the scale exist of only two items, delete the whole scale */
 			if(NUMITEMS[scale] == 2)
 			{
-				pop(ITEMS[scale*NITEM],		mem) = 0;
-				pop(ITEMS[scale*NITEM + 1],	mem) = 0;
+				pop[ ITEMS[scale*NITEM] + mem*NITEM] = 0;
+				pop[ ITEMS[scale*NITEM + 1] + mem*NITEM] = 0;
 				NUMITEMS[scale] = 0;
 				NSCALES--;
 				return; // exit while loop and function
@@ -269,12 +265,12 @@ void Criterion2Rcpp(
 			{
 
 				/* delete item with smallest Hi coefficient and adjust matrix ITEMS */
-				pop(ITEMS[orderHi[0]+scale*NITEM], mem) = 0;
-				ITEMS(orderHi[0], scale) = 0;
+				pop[ ITEMS[orderHi[0]+scale*NITEM] + mem*NITEM ] = 0;
+				ITEMS[orderHi[0] + scale*NITEM] = 0;
 
 				if (orderHi[0] < (NUMITEMS[scale]-1))
 					for (int i = orderHi[0]; i<(NUMITEMS[scale]-1); i++)
-						ITEMS(i, scale) = ITEMS(i+1, scale);
+						ITEMS[i + scale*NITEM] = ITEMS[i + scale*NITEM + 1];
 
 				ITEMS[NUMITEMS[scale] + scale*NITEM - 1] = 0;
 
@@ -311,6 +307,8 @@ void TestHiRcpp(
 {
 
 	int a, b;              /* indicators for 'items' */
+	int i, j;              /* for-loop indicators */
+	int stop=0;            /* while-loop indicators */
 	double sumSij, S;
 
 	/* Z-values of Hi-coefficients */
@@ -319,24 +317,20 @@ void TestHiRcpp(
 	/* The order of the z-values */
 	IntegerVector orderZi(NITEM);
 
-	while (true)
-	{
+	while(!stop) {
 
 		/* Calculate the Zi-values */
-		for (int i = 0; i < NUMITEMS[scale]; i++)
-		{
-			a = ITEMS(i, scale);
+		for(i=0; i<NUMITEMS[scale]; i++) {
+			a = ITEMS[i + scale*NITEM];
 			sumSij = 0;
 			S = 0;
 
-			for (int j = 0; j < NUMITEMS[scale]; j++)
-			{
-				b = ITEMS(j, scale);
+			for(j=0; j<NUMITEMS[scale]; j++) {
+				b = ITEMS[j + scale*NITEM];
 
-				if(i != j)
-				{
-					sumSij += SijMatrix(a, b);
-					S += VAR(a, b);
+				if(i != j) {
+					sumSij += SijMatrix[a + b*NITEM];
+					S += VAR[a + b*NITEM];
 				}
 			}
 
@@ -355,8 +349,8 @@ void TestHiRcpp(
 			/* if the scale exist of only two items, delete the whole scale */
 			if(NUMITEMS[scale] == 2) {
 
-				pop(ITEMS[scale*NITEM],		mem) = 0;
-				pop(ITEMS[scale*NITEM + 1],	mem) = 0;
+				pop[ ITEMS[scale*NITEM] + mem*NITEM] = 0;
+				pop[ ITEMS[scale*NITEM + 1] + mem*NITEM] = 0;
 				NUMITEMS[scale] = 0;
 				NSCALES--;
 				return;
@@ -369,10 +363,10 @@ void TestHiRcpp(
 				NUMITEMS[scale] -= 1;
 
 				if (orderZi[0] < (NUMITEMS[scale]-1))
-					for (int i = orderZi[0]; i < (NUMITEMS[scale]-1); i++)
-						ITEMS(i, scale) = ITEMS(i+1, scale);
-
-				ITEMS(NUMITEMS[scale] - 1, scale) = 0;
+					for(i=orderZi[0]; i<(NUMITEMS[scale]-1); i++) {
+						ITEMS[i + scale*NITEM] = ITEMS[i + scale*NITEM + 1];
+					}
+				ITEMS[NUMITEMS[scale] + scale*NITEM - 1] = 0;
 
 			}
 		}
@@ -399,7 +393,6 @@ void testHijRcpp(
 	const	int				NITEM)
 {
 	// TODO: return nscales rather than taking it by reference.
-	// TODO: make function deleteScale?
 	int i, j, k;                /* for-loop indicators */
 	int a, b;                   /* indicators for 'items' */
 	int randnum;                /* a randomly drawn number */
@@ -553,96 +546,7 @@ void EvaluateRcpp(
 	}
 }
 
-/*************************************************************
-* Keep the best function: This function keeps track of the   *
-* best member of the population. Note that the last entry in *
-* the array Population holds a copy of the best invidual     *
-*************************************************************/
 
-int KeepTheBestRcpp(
-			IntegerMatrix&	pop,
-			NumericVector&	fitness,
-	const	int				NITEM,
-	const	int				POPSIZE,
-			IntegerVector&	generation,
-			int				itercount)
-{
-
-	int mem;
-	int i;
-	int CurrentBest=0;
-
-	/* Select the first member of the population */
-	fitness[POPSIZE+1] = fitness[0];
-
-	/* Compare fitness to subsequent members */
-	for(mem=1; mem<POPSIZE; mem++)
-		if(fitness[mem] > fitness[CurrentBest]) {
-			CurrentBest = mem;
-			fitness[POPSIZE+1] = fitness[mem];
-		}
-
-	/* Once the best member in the population is found, copy the genes */
-	for(i=0; i<NITEM; i++)
-		pop[(POPSIZE+1)*NITEM + i] = pop[CurrentBest*NITEM + i];
-
-	/* Compare the best member with the stored best partitioning */
-	if( fitness[POPSIZE+1] > fitness[POPSIZE]) {
-		fitness[POPSIZE] = fitness[POPSIZE+1];
-
-		for(i=0; i<NITEM; i++)
-			pop[POPSIZE*NITEM + i] = pop[(POPSIZE+1)*NITEM + i];
-		Rcpp::Rcout << "itercount reset to 0 but was: " << itercount << std::endl;
-		Rcpp::Rcout << "Generation: " << generation[0] << std::endl;
-
-		generation[0]=0;
-		itercount = 0;
-	}
-	return itercount;
-
-}
-
-/*************************************************************
-* Elitist model.                                             *
-* Assess which member of the new population is the best and  *
-* which member of the new population is the worst.           *
-*                                                            *
-* If best individual from the new population is worse than   *
-* the best individual from the previous populations, replace *
-* the worst individual from the current population with the  *
-* best one from the previous generation.                     *
-*************************************************************/
-
-void ElitistRcpp(
-	const	int				POPSIZE,
-	const	int				NITEM,
-			NumericVector&	fitness,
-			IntegerVector&	pop)
-{
-
-	int i;
-	double best = 0.0;     /* fitness value of the best member */
-	double worst = 1.0;    /* fitness value of the worst member */
-	int WorstMember = 0;   /* which member had the smallest fitness */
-
-	/* search for the best and worst member */
-	for(i=0; i<POPSIZE; i++) {
-		if(fitness[i] > best) {
-			best = fitness[i];
-		}
-		if(fitness[i] < worst) {
-			worst = fitness[i+1];
-			WorstMember = i + 1;
-		}
-	}
-
-	/* replace worst member by best member */
-	if(best < fitness[POPSIZE]){
-		for(i=0; i<NITEM; i++)
-			pop[i + WorstMember*NITEM] = pop[i + NITEM*POPSIZE];
-		fitness[WorstMember] = fitness[POPSIZE];
-	}
-}
 
 /*************************************************************
 * Selection. Select a new population from the old population *
@@ -841,6 +745,98 @@ void MutationRcpp(
 }
 
 
+/*************************************************************
+* Keep the best function: This function keeps track of the   *
+* best member of the population. Note that the last entry in *
+* the array Population holds a copy of the best invidual     *
+*************************************************************/
+
+int KeepTheBestRcpp(
+			IntegerMatrix&	pop,
+			NumericVector&	fitness,
+	const	int				NITEM,
+	const	int				POPSIZE,
+			IntegerVector&	generation,
+			int				itercount)
+{
+
+	int mem;
+	int i;
+	int CurrentBest=0;
+
+	/* Select the first member of the population */
+	fitness[POPSIZE+1] = fitness[0];
+
+	/* Compare fitness to subsequent members */
+	for(mem=1; mem<POPSIZE; mem++)
+		if(fitness[mem] > fitness[CurrentBest]) {
+			CurrentBest = mem;
+			fitness[POPSIZE+1] = fitness[mem];
+		}
+
+	/* Once the best member in the population is found, copy the genes */
+	for(i=0; i<NITEM; i++)
+		pop[(POPSIZE+1)*NITEM + i] = pop[CurrentBest*NITEM + i];
+
+	/* Compare the best member with the stored best partitioning */
+	if( fitness[POPSIZE+1] > fitness[POPSIZE]) {
+		fitness[POPSIZE] = fitness[POPSIZE+1];
+
+		for(i=0; i<NITEM; i++)
+			pop[POPSIZE*NITEM + i] = pop[(POPSIZE+1)*NITEM + i];
+
+		generation[0]=0;
+		itercount = 0;
+	}
+	return itercount;
+
+}
+
+
+
+/*************************************************************
+* Elitist model.                                             *
+* Assess which member of the new population is the best and  *
+* which member of the new population is the worst.           *
+*                                                            *
+* If best individual from the new population is worse than   *
+* the best individual from the previous populations, replace *
+* the worst individual from the current population with the  *
+* best one from the previous generation.                     *
+*************************************************************/
+
+void ElitistRcpp(
+	const	int				POPSIZE,
+	const	int				NITEM,
+			NumericVector&	fitness,
+			IntegerVector&	pop)
+{
+
+	int i;
+	double best = 0.0;     /* fitness value of the best member */
+	double worst = 1.0;    /* fitness value of the worst member */
+	int WorstMember = 0;   /* which member had the smallest fitness */
+
+	/* search for the best and worst member */
+	for(i=0; i<POPSIZE; i++) {
+		if(fitness[i] > best) {
+			best = fitness[i];
+		}
+		if(fitness[i] < worst) {
+			worst = fitness[i+1];
+			WorstMember = i + 1;
+		}
+	}
+
+	/* replace worst member by best member */
+	if(best < fitness[POPSIZE]){
+		for(i=0; i<NITEM; i++)
+			pop[i + WorstMember*NITEM] = pop[i + NITEM*POPSIZE];
+		fitness[WorstMember] = fitness[POPSIZE];
+	}
+}
+
+
 
 /*******************************************************************************
 * Function 'GeneticAlgorithm()' is the main body of the algorithm. All input   *
@@ -863,18 +859,6 @@ void MutationRcpp(
 *    partitioning.                                                             *
 *******************************************************************************/
 
-#include <chrono>
-using namespace std::chrono;
-void printTime(const high_resolution_clock::time_point& start,
-			   const high_resolution_clock::time_point& stop,
-			   const std::string& text)
-{
-    auto duration = duration_cast<milliseconds>(stop - start);
-	Rcpp::Rcout << "Time taken by function: " << text
-				<< duration.count() << " ms" << std::endl;
-
-}
-
 void GeneticAlgorithmRcpp(
 	const	int				POPSIZE,
 	const	int				NPERS,
@@ -884,8 +868,8 @@ void GeneticAlgorithmRcpp(
 	const	double			critval,
 	const	double			alpha,
 	const	int				NITEM,
-	const	NumericMatrix&	variance,
-	const	NumericMatrix&	maxVariance,
+	const	NumericMatrix&	VAR,
+	const	NumericMatrix&	MAXVAR,
 	const	NumericMatrix&	SijMatrix,
 	const	NumericMatrix&	HijMatrix,
 	// these three change across iterations
@@ -928,7 +912,7 @@ void GeneticAlgorithmRcpp(
 			InitializeRcpp(population, nclus);
 
 			/*Evaluate initial population */
-			EvaluateRcpp(population, newpopulation, POPSIZE, nclus, NITEM, NPERS, fitness, variance, maxVariance,
+			EvaluateRcpp(population, newpopulation, POPSIZE, nclus, NITEM, NPERS, fitness, VAR, MAXVAR,
 						 HijMatrix, critval, SijMatrix, Zcv);
 
 			for(int i=0; i<POPSIZE; i++) TotalFitness += fitness[i];
@@ -941,18 +925,20 @@ void GeneticAlgorithmRcpp(
 				TotalFitness = 1.0;
 			}
 		}
+
 		/* Store the best partitioning */
 		itercount = KeepTheBestRcpp(population,fitness,NITEM,POPSIZE,generation,itercount);
 	}
 
 	/* An iterative process to find the final partitioning */
 	while(generation[0]<MAXGENS) {
+
 		TotalFitness = 0.0;
 		generation[0]++;
 
-//		Rcpp::Rcout << "generation[0]" << generation[0] << std::endl;
+
+
 		/* select a new population */
-//		auto start = high_resolution_clock::now();
 		SelectionRcpp(POPSIZE,NITEM,fitness,population,newpopulation);
 
 		/* crossovers between members */
@@ -963,16 +949,13 @@ void GeneticAlgorithmRcpp(
 
 		/* evaluate the new population */
 		EvaluateRcpp(population, newpopulation, POPSIZE, nclus, NITEM, NPERS, fitness,
-					 variance, maxVariance, HijMatrix, critval, SijMatrix, Zcv);
+					 VAR, MAXVAR, HijMatrix, critval, SijMatrix, Zcv);
 
 		/* store the best partitioning */
 		itercount = KeepTheBestRcpp(population,fitness,NITEM,POPSIZE,generation,itercount);
 
 		/* ascertain that best partitioning always stays in the population */
 		ElitistRcpp(POPSIZE, NITEM, fitness, population);
-
-//		auto stop = high_resolution_clock::now();
-//		printTime(start, stop, "SelectionRcpp");
 
 
 		if(fitness[POPSIZE] == 1)   generation[0] = MAXGENS;
@@ -986,7 +969,7 @@ IntegerMatrix runGeneticAlgorithm(
 		const int POPSIZE, const int NPERS, const int MAXGENS,
 		const double PXOVER, const double PMUTATION, const double critval,
 		const double alpha, const int NITEM, const int ITER,
-		const NumericMatrix& variance, const NumericMatrix& maxVariance,
+		const NumericMatrix& VAR, const NumericMatrix& MAXVAR,
 		const NumericMatrix& SijMatrix)
 {
 
@@ -1005,23 +988,20 @@ IntegerMatrix runGeneticAlgorithm(
 	{
 		for(int j = 0; j<NITEM; j++)
 		{
-			if (maxVariance(j, i) > 0.0000001)
-				HijMatrix(j, i) = variance(j, i) / maxVariance(j, i);
+			if (VAR(j, i) > 0.0000001)
+				HijMatrix(j, i) = VAR(j, i) / MAXVAR(j, i);
 		}
 	}
 
 	const int iterCheck = int(ceil(double(MAXGENS) / double(ITER)));
-	Rcpp::Rcout << "iterCheck " << iterCheck << std::endl;
 	do
 	{
 		GeneticAlgorithmRcpp(POPSIZE, NPERS, MAXGENS,PXOVER, PMUTATION, critval,
-							alpha, NITEM, variance, maxVariance, SijMatrix, HijMatrix,
+							alpha, NITEM, VAR, MAXVAR, SijMatrix, HijMatrix,
 							// these three change across iterations
 							itercount, population, fitness,
 							// preinitialized memory
 							newpopulation);
-		Rcpp::Rcout << "itercount " << itercount << std::endl;
-		Rcpp::Rcout << "fitness[POPSIZE] " << fitness[POPSIZE] << std::endl;
 	}
 	while (itercount != iterCheck);
 

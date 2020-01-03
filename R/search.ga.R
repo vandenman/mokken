@@ -15,16 +15,16 @@
 
      ans <- runGeneticAlgorithm(
              POPSIZE = as.integer(popsize), 
-             NPERS = as.integer(npers), 
-             MAXGENS = as.integer(maxgens), 
+             NPERS = as.integer(npers),
+             MAXGENS = as.integer(iter),
              PXOVER = as.double(pxover),
              PMUTATION = as.double(pmutation), 
              critval = as.double(critval),
              alpha = as.double(alpha),
              NITEM = as.integer(nitem),
              ITER = as.integer(iter),
-             variance = variance,
-             maxVariance = max.variance, 
+             VAR = variance,
+             MAXVAR = max.variance, 
              SijMatrix = SijMatrix
      )
      

@@ -17,8 +17,7 @@ export(
  MLcoefH,
  MLweight,
  recode,
- twoway,
- runGeneticAlgorithm
+ twoway
 )
 
 # used internally - not intended to be visible to users

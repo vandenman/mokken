@@ -16,6 +16,13 @@ coefH <- function (X, se = TRUE, nice.output = TRUE, group.var = NULL, fixed.ite
        fixed.itemstep.order <- NULL
        warning("fixed.itemstep.order as incorrect dimensions and/or incorrect values: fixed.itemstep.order ignored")
     }
+    if (!(!se && is.null(group.var) && is.null(fixed.itemstep.order)) && max(X) > 10){
+       warning("More than 10 response categories: Cannot compute standard errors, include grouping variables, or handle fixed item-step orderings")
+       # Het probleem zit erin dat testring2integer alleen werkt bij antwoordopties 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. Mogelijk makkelijk op te lossen
+       se <- FALSE
+       group.var <- NULL
+       fixed.itemstep.order <- NULL
+    }
     if (!se && is.null(group.var) && is.null(fixed.itemstep.order)) {
        S <- var(X)
        Smax <- var(apply(X, 2, sort))
@@ -162,6 +169,7 @@ coefH <- function (X, se = TRUE, nice.output = TRUE, group.var = NULL, fixed.ite
           OL[[group.item]] <- list() 
           names(OL)[[group.item]] <- "Groups"
           group.var <- apply(as.matrix(group.var),1,paste, sep="", collapse="/")
+          #### GROUPVAR AANPASSEN : UNDO check.data() FOR group.var
           group.names <- sort(unique(group.var))
           K <- length(group.names)
           for (group in 1:K){

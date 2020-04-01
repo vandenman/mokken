@@ -1,6 +1,6 @@
 Package: mokken
 Version: 2.9.0
-Date: 2019-11-25
+Date: 2020-03-01
 Title:  Conducts Mokken Scale Analysis
 Authors@R: c(person("L. Andries", "van der Ark", role = c("aut", "cre"),
                      email = "L.A.vanderArk@uva.nl"),
@@ -10,7 +10,7 @@ Author: L. Andries van der Ark [aut, cre],
   J. Hendrik Straat [aut],
   Letty Koopman [aut]
 Maintainer: L. Andries van der Ark <L.A.vanderArk@uva.nl>
-Depends: R (>= 3.0.0), graphics, poLCA
+Depends: R (>= 3.5.0), graphics, poLCA
 Suggests: MASS
 Description: Contains functions for performing Mokken
    scale analysis on test and questionnaire data (e.g., Sijtsma and Van der Ark, 2017, <doi:10.1111/bmsp.12078>).

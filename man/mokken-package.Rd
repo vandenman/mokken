@@ -35,8 +35,8 @@ The package contains the following data sets
 A guide for Mokken scale analysis in R for people who do not know R (Van der Ark, 2010)  is available as a vignette from \url{https://sites.google.com/a/tilburguniversity.edu/avdrark/mokken}.
 
 Thanks are due 
- to Michael Allerhand, Geert H. van Kollenburg, Letty Koopman, Renske E. Kuijpers, Rudy Ligtvoet, Hannah E. M. Oosterhuis, J. Hendrik Straat, and Daniel W. van der Palm for contributing R code; 
- to Geert H. van Kollenburg, Letty Koopman, Rudy Ligtvoet, Patrick Mair, J. Hendrik Straat, and Don van Ravenswaaij for testing the software; 
+ to Michael Allerhand, Don van den Berg, Geert H. van Kollenburg, Letty Koopman, Renske E. Kuijpers, Rudy Ligtvoet, Hannah E. M. Oosterhuis, J. Hendrik Straat, and Daniel W. van der Palm for contributing R code; 
+ to Don van den Bergh, Geert H. van Kollenburg, Letty Koopman, Rudy Ligtvoet, Patrick Mair, J. Hendrik Straat, and Don van Ravenswaaij for testing the software; 
  to Wijbrandt van Schuur for comments on the vignette;
  to Michael Allerhand, Stephen Cubbellotti, Michael Dewey, Jasmin Durstin, Wilco H. M. Emons, Jue Huang, Michael Kubovy, Ivo Molenaar, Jonathan Rose, Tobias Schlaffer, Klaas Sijtsma, Iris Smits, Jia Jia Syu, Stefan Vermeent, Roger Watson, and Na Yang for reporting comments or bugs;
  to Diederick Stoel (ProfitWise) for financial support, 
@@ -137,7 +137,12 @@ The following modifications have been made in Version 2.8.12 in comparison to pr
 \tabular{ll}{
 \code{\link{check.monotonicity}} \tab Z statistic adjusted (Molenaar & Sijtsma, 2000. p. 72 )\cr
 \code{\link{check.norms}}        \tab Z Output corrected for \code{nice.output = FALSE}\cr
+}
 
+The following modifications have been made in Version 2.9.0 in comparison to previous versions.
+\tabular{ll}{
+\code{\link{coefH}}              \tab Z Solution of Koopman et al. (2017) implemented to solve the problem of equal item steps and code updated\cr
+\code{\link{MLcoefH}}            \tab Z Solution of Koopman et al. (2017) implemented to solve the problem of equal item steps and code updated\cr
 }
 
 }

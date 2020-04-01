@@ -13,6 +13,7 @@ export(
  check.pmatrix,
  check.reliability,
  check.restscore,
+ ICC,
  MLcoefH,
  MLweight,
  recode,

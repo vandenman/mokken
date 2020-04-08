@@ -17,8 +17,8 @@
 
 \usage{
     aisp(X, lowerbound=.3, search="normal", alpha=.05, StartSet=FALSE, popsize=20, 
-    maxgens=default.maxgens, pxover=0.5, pmutation=0.1, verbose=FALSE, 
-    type.se = "delta", test.Hi = FALSE, level.two.var = NULL)
+         maxgens=default.maxgens, pxover=0.5, pmutation=0.1, verbose=FALSE, 
+         type.se = "delta", test.Hi = FALSE, level.two.var = NULL)
 }
 
 \arguments{
@@ -122,8 +122,10 @@ scale <- aisp(Communality, StartSet = c(1, 2), verbose = TRUE)
 coefH(Communality[,scale==1])
 
 # Perform aisp for increasing lowerbounds
+\donttest{
 scales <- aisp(Communality, lowerbound = seq(0, .55, .05))
 scales
+}
 
 # Use a significant test for criteria Hi > c (rather than the point estimate)
 scale <- aisp(Communality, test.Hi = TRUE, verbose = TRUE)
@@ -142,5 +144,6 @@ coefH(scores[, scale==1], level.two.var = classes)
 
 }
 
-\keyword{aisp}
-\keyword{scalability coefficients}
+\concept{aisp}
+\concept{automated item selection procedure}
+\concept{scalability coefficients}

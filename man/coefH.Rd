@@ -15,7 +15,8 @@ It is also possible to compare scalability coefficients across groups using the 
  }
 
 \usage{
-coefH(X, se = TRUE, nice.output = TRUE, level.two.var = NULL, group.var = NULL, fixed.itemstep.order = NULL)
+coefH(X, se = TRUE, nice.output = TRUE, level.two.var = NULL, group.var = NULL, 
+      fixed.itemstep.order = NULL)
 }
 
 \arguments{
@@ -23,9 +24,9 @@ coefH(X, se = TRUE, nice.output = TRUE, level.two.var = NULL, group.var = NULL, 
           containing the responses of \code{nrow(X)} respondents to \code{ncol(X)} items. 
           Missing values are not allowed}
   \item{se}{Logical: If \code{TRUE}, the standard errors of the scalability coefficients are given}
+  \item{nice.output}{Logical: If \code{TRUE}, scalability coefficients and standard errors are combined in an a single object of class \code{noquote}}
   \item{level.two.var}{vector of length \code{nrow(X)} or matrix with number of rows equal to \code{nrow(X)} 
           that indicates the level two variable for nested data to get appropriate standard errors (Koopman et al., 2020.}
-  \item{nice.output}{Logical: If \code{TRUE}, scalability coefficients and standard errors are combined in an a single object of class \code{noquote}}
   \item{group.var}{vector of length \code{nrow(X)} or matrix with number of rows equal to \code{nrow(X)} to be used as grouping variable}
   \item{fixed.itemstep.order}{matrix with number of rows equal to the number of item steps (m) and number of columns equal to the number of items (J). The matrix should consis the integers 1 : (m * J), indicating a predefined order of the items steps with respect to popularity. Value 1 indicates the easiest (most popular) item step, value (m * J) indicates the most difficult item step.}
 }
@@ -121,4 +122,4 @@ classes <- autonomySupport[, 1]
 coefH(scores, level.two.var = classes)
 
 }
-\keyword{scalability coefficients}
+\concept{scalability coefficient}

@@ -17,7 +17,8 @@
 }
 
 \usage{
-    MLcoefH(X, se = TRUE, nice.output = TRUE, subject = 1, fixed.itemstep.order = NULL, weigh.props = TRUE)
+    MLcoefH(X, se = TRUE, nice.output = TRUE, subject = 1, 
+            fixed.itemstep.order = NULL, weigh.props = TRUE)
 }
 
 \arguments{
@@ -29,7 +30,7 @@
            in an a single object of class \code{noquote}. Item-pair ratios BWij are only printed if \code{FALSE}}
   \item{subject}{Represents the subject column. Default is column 1.}
   \item{fixed.itemstep.order}{matrix with number of rows equal to the number of item steps (m) and number of columns equal to the number of items (J). The matrix should consis the integers 1 : (m * J), indicating a predefined order of the items steps with respect to popularity. Value 1 indicates the easiest (most popular) item step, value (m * J) indicates the most difficult item step.}
-  \item{weight.props}{If \code{TRUE}: Use weighted proportions across groups to estimate coefficients and standard errors, if \code{FALSE}: Use averaged proportions across groups to estimate coefficients and standard errors.}
+  \item{weigh.props}{If \code{TRUE}: Use weighted proportions across groups to estimate coefficients and standard errors, if \code{FALSE}: Use averaged proportions across groups to estimate coefficients and standard errors.}
 }
 
 \details{
@@ -111,4 +112,5 @@ H.not
 }
 
 }
-\keyword{two-level scalability coefficients}
+\concept{two-level scalability coefficient}
+\concept{scalability coefficient}

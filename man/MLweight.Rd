@@ -58,4 +58,5 @@
     for(i in 1:(I - 1)) for(j in (i + 1):I) 
     print(MLweight(smallData[, c(1, i + 1, j + 1)], minx = 0, maxx = 2))
 }
-\keyword{Weighted Guttman errors, two-level scalability coefficients}
+\concept{weighted Guttman errors} 
+\concept{two-level scalability coefficient}

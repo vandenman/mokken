@@ -40,7 +40,7 @@ coefZ(X, lowerbound = 0, type.se = "delta", level.two.var = NULL)
 }
 
 \details{
-The Z-score for item-pair coefficient \eqn{H_{ij}} with standard error \eqn{SE(H_{ij})} is computed as \deqn{Z = \frac{\widehat{H}_{ij} - lowerbound}{SE(H_{ij})}}.
+The Z-score for the estimated item-pair coefficient \eqn{Hij} with standard error \eqn{SE(Hij)} is computed as \deqn{Z = (Hij - lowerbound) / SE(Hij)}
 Unlike \code{coefH}, standard errors are not provided.
 }
 
@@ -102,4 +102,4 @@ coefZ(scores, level.two.var = classes)
 
 
 }
-\keyword{scalability coefficients}
+\concept{scalability coefficient}

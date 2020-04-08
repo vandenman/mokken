@@ -52,7 +52,7 @@ Peetsma, T. T. D., Wagenaar, E., & De Kat, E. (2001).
    and integrated schools in the Netherlands and the role of ethnic self-description. 
    In J. Koppen, I. Lunt, & C. Wulf (Eds.), 
 \emph{Education in Europe. Cultures, Values, Institutions in Transition} 
-   (pp. 54–74). Munster/New York: Waxmann.
+   (pp. 54-74). Waxmann.
 
 Zijsling, D., Keuning, J., Keizer-Mittelhaeuser, M.-A., Naaijer, H., & Timmermans, A. (2017).
    \emph{Cohortonderzoek COOL5-18: Technisch rapport meting VO-3 in 2014}. 
@@ -68,12 +68,11 @@ Zijsling, D., Keuning, J., Keizer-Mittelhaeuser, M.-A., Naaijer, H., & Timmerman
 }
 
 \examples{
-
 # Data example (Koopman et al., 2020)
 data(SWMD)
 
 # Compute ICC
 ICC(SWMD)
-
 }
+
 \keyword{datasets}

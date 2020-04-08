@@ -22,9 +22,6 @@
            Missing values are not allowed}
 }
 
-\details{
-}
-
 \value{
  \item{itemICC}{The ICC per item}  
  \item{scaleICC}{The ICC for the total scale and the corresponding results for the F-test}
@@ -59,4 +56,5 @@ data(SWMD)
 ICC(SWMD)
 
 }
-\keyword{intraclass correlation, ICC}
+\concept{intraclass correlation}
+\concept{ICC}

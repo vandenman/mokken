@@ -1,4 +1,3 @@
-# Modified on Feb 19 2020
 "aisp" <- function(X, 
                    lowerbound =.3, 
                    search = "normal", 
@@ -35,8 +34,9 @@
    if(maxgens < 1) stop("maxgens is nonpositive")
    if(search == "ga"){ 
       output <- NULL
+      tmp <- coefH(X, se = FALSE)$Hij; diag(tmp) <- 0; c.max <- max(tmp)
       for (lb in lowerbound){ 
-         ga <- search.ga(X, popsize, maxgens, alpha, lb, pxover, pmutation)
+         if (lb > c.max) ga <- matrix(0L, nrow = ncol(X), dimnames = list(rlabels, lb)) else ga <- search.ga(X, popsize, maxgens, alpha, lb, pxover, pmutation)
          output <- cbind(output, ga)
       }
       dimnames(output) <- list(dimnames(X)[[2]], lowerbound)
@@ -78,52 +78,52 @@
 
 
 
-"aisp.old" <- function(X, 
-                       lowerbound =.3, 
-                       search = "normal", 
-                       alpha = .05, 
-                       StartSet = FALSE,
-                       popsize = 20, 
-                       maxgens = default.maxgens, 
-                       pxover = 0.5, 
-                       pmutation = 0.1,
-                       verbose = FALSE)
-{
-   X <- check.data(X)
-   output <- NULL
-   clabels <- as.character(lowerbound)
-   rlabels <- dimnames(X)[[2]]
-   params <- c(alpha, pxover, pmutation)
-   cparams <- c("alpha", "pxover", "pmutation")
-   for (i in 1:3){
-      if(!is.numeric(params[i])|is.na(params[i])) stop(cparams[i], " is not numeric")
-      if (params[i] < 0) {warning(paste("Negative ",cparams[i],". ",cparams[i]," is set to 0")); assign(params[i],0)}
-      if (params[i] > 1) {warning(paste(cparams[i]," greater than 1. ",cparams[i]," is set to 1")); assign(params[i],1)}
-   }
-   for (i in 1:length(lowerbound)){
-      if(!is.numeric(lowerbound[i])|is.na(lowerbound[i])) stop(" lowerbound contains non-numeric values")
-      if (lowerbound[i] > 1) {warning(paste("Lower bound greater than 1. Lower bound is set to 1")); lowerbound[i] <- 1}
-   }
-   default.maxgens <- 10^(log2(ncol(X)/5)) * 1000
-   if(is.numeric(popsize)&!is.na(popsize)) popsize <- as.integer(popsize) else stop("popsize is not numeric")
-   if(popsize < 1) stop("popsize is nonpositive")
-   if(is.numeric(maxgens)&!is.na(maxgens)) maxgens <- as.integer(maxgens) else stop("maxgens is not numeric")
-   if(maxgens < 1) stop("maxgens is nonpositive")
-   if(search == "ga"){ 
-      output <- NULL
-      for (lb in lowerbound){ 
-         ga <- search.ga(X, popsize, maxgens, alpha, lb, pxover, pmutation)
-         output <- cbind(output, ga)
-      }
-      dimnames(output) <- list(dimnames(X)[[2]], lowerbound)
-   } else if(search == "extended") {
-      output <- search.extended(verbose) 
-   } else {
-      output <- NULL
-      for (lb in lowerbound){ 
-         no <- search.normal(X, lb, alpha, StartSet, verbose)
-         output <- cbind(output, no)
-      }  
-   }  
-   return(output)   
-}
+#"aisp.old" <- function(X, 
+#                       lowerbound =.3, 
+#                       search = "normal", 
+#                       alpha = .05, 
+#                       StartSet = FALSE,
+#                       popsize = 20, 
+#                       maxgens = default.maxgens, 
+#                       pxover = 0.5, 
+#                       pmutation = 0.1,
+#                       verbose = FALSE)
+#{
+#   X <- check.data(X)
+#   output <- NULL
+#   clabels <- as.character(lowerbound)
+#   rlabels <- dimnames(X)[[2]]
+#   params <- c(alpha, pxover, pmutation)
+#   cparams <- c("alpha", "pxover", "pmutation")
+#   for (i in 1:3){
+#      if(!is.numeric(params[i])|is.na(params[i])) stop(cparams[i], " is not numeric")
+#      if (params[i] < 0) {warning(paste("Negative ",cparams[i],". ",cparams[i]," is set to 0")); assign(params[i],0)}
+#      if (params[i] > 1) {warning(paste(cparams[i]," greater than 1. ",cparams[i]," is set to 1")); assign(params[i],1)}
+#   }
+#   for (i in 1:length(lowerbound)){
+#      if(!is.numeric(lowerbound[i])|is.na(lowerbound[i])) stop(" lowerbound contains non-numeric values")
+#      if (lowerbound[i] > 1) {warning(paste("Lower bound greater than 1. Lower bound is set to 1")); lowerbound[i] <- 1}
+#   }
+#   default.maxgens <- 10^(log2(ncol(X)/5)) * 1000
+#   if(is.numeric(popsize)&!is.na(popsize)) popsize <- as.integer(popsize) else stop("popsize is not numeric")
+#   if(popsize < 1) stop("popsize is nonpositive")
+#   if(is.numeric(maxgens)&!is.na(maxgens)) maxgens <- as.integer(maxgens) else stop("maxgens is not numeric")
+#   if(maxgens < 1) stop("maxgens is nonpositive")
+#   if(search == "ga"){ 
+#      output <- NULL
+#      for (lb in lowerbound){ 
+#         ga <- search.ga(X, popsize, maxgens, alpha, lb, pxover, pmutation)
+#         output <- cbind(output, ga)
+#      }
+#      dimnames(output) <- list(dimnames(X)[[2]], lowerbound)
+#   } else if(search == "extended") {
+#      output <- search.extended(verbose) 
+#   } else {
+#      output <- NULL
+#      for (lb in lowerbound){ 
+#         no <- search.normal(X, lb, alpha, StartSet, verbose)
+#         output <- cbind(output, no)
+#      }  
+#   }  
+#   return(output)   
+#}

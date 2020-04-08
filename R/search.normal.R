@@ -11,7 +11,7 @@
 "search.normal" <-
 function(X, lowerbound, alpha, StartSet, verbose, type.se, test.Hi, level.two.var){
   #type.se should be "Z" or "delta"
-
+  
    # Internal functions
    
    any.neg <- function(x){if(any(x < 0)) TRUE else FALSE}
